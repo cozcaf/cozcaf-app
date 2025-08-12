@@ -252,7 +252,7 @@ export default function Home() {
               <div className="text-2xl font-bold">{selectedContacts.length}</div>
             </CardContent>
           </Card>
-          <Card>
+          {/* <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Messages Sent</CardTitle>
               <BarChart3 className="h-4 w-4 text-muted-foreground" />
@@ -260,8 +260,8 @@ export default function Home() {
             <CardContent>
               <div className="text-2xl font-bold">{messageHistory.length}</div>
             </CardContent>
-          </Card>
-          <Card>
+          </Card> */}
+          {/* <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Orders</CardTitle>
               <ShoppingCart className="h-4 w-4 text-muted-foreground" />
@@ -269,7 +269,7 @@ export default function Home() {
             <CardContent>
               <div className="text-2xl font-bold">{orders.length}</div>
             </CardContent>
-          </Card>
+          </Card> */}
         </div>
 
         <Tabs defaultValue="contacts" className="space-y-6">
