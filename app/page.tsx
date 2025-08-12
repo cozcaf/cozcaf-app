@@ -23,7 +23,7 @@ export interface Contact {
     name: string
   }
   wa_id: string,
-  createdAt:string
+  createdAt:any
 }
 
 export interface Order {

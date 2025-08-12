@@ -224,7 +224,7 @@ export function MessageComposer({ selectedContacts, contacts }: MessageComposerP
           <Tabs defaultValue="compose" className="space-y-4">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="compose">Compose</TabsTrigger>
-              <TabsTrigger value="templates">Templates</TabsTrigger>
+              {/* <TabsTrigger value="templates">Templates</TabsTrigger> */}
             </TabsList>
 
             <TabsContent value="compose" className="space-y-4">
