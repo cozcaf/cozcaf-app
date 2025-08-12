@@ -195,39 +195,7 @@ export function MessageComposer({ selectedContacts, contacts }: MessageComposerP
                 </div>
               </div>
 
-              <div className="space-y-4 p-4 border rounded-lg">
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    id="schedule"
-                    checked={isScheduled}
-                    onChange={(e) => setIsScheduled(e.target.checked)}
-                    className="rounded"
-                  />
-                  <Label htmlFor="schedule" className="flex items-center gap-2">
-                    <Clock className="h-4 w-4" />
-                    Schedule Message
-                  </Label>
-                </div>
-
-                {isScheduled && (
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>Date</Label>
-                      <Input
-                        type="date"
-                        value={scheduleDate}
-                        onChange={(e) => setScheduleDate(e.target.value)}
-                        min={new Date().toISOString().split("T")[0]}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Time</Label>
-                      <Input type="time" value={scheduleTime} onChange={(e) => setScheduleTime(e.target.value)} />
-                    </div>
-                  </div>
-                )}
-              </div>
+              
             </TabsContent>
 
             <TabsContent value="templates" className="space-y-4">
@@ -326,19 +294,19 @@ export function MessageComposer({ selectedContacts, contacts }: MessageComposerP
                 <div key={contact.id} className="flex items-center space-x-3 p-3 bg-muted/50 rounded-lg">
                   <Avatar className="h-8 w-8">
                     <AvatarFallback className="bg-green-100 text-green-700 text-xs">
-                      {contact.name.charAt(0).toUpperCase()}
+                      {contact.profile.name.charAt(0).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm">{contact.name}</p>
-                    <p className="text-xs text-muted-foreground">{contact.phone}</p>
+                    <p className="font-medium text-sm">{contact.profile.name}</p>
+                    <p className="text-xs text-muted-foreground">{contact.wa_id}</p>
                     {message && (
                       <p className="text-xs text-blue-600 mt-1 truncate">
                         Preview: {personalizeMessage(message, contact).substring(0, 50)}...
                       </p>
                     )}
                   </div>
-                  {contact.tags.length > 0 && (
+                  {/* {contact.tags.length > 0 && (
                     <div className="flex gap-1">
                       {contact.tags.slice(0, 2).map((tag, index) => (
                         <Badge key={index} variant="outline" className="text-xs">
@@ -351,7 +319,7 @@ export function MessageComposer({ selectedContacts, contacts }: MessageComposerP
                         </Badge>
                       )}
                     </div>
-                  )}
+                  )} */}
                 </div>
               ))}
             </div>

@@ -18,7 +18,12 @@ export interface Contact {
   name: string
   phone: string
   tags: string[]
-  addedDate: string
+  addedDate: string,
+  profile:{
+    name: string
+  }
+  wa_id: string,
+  createdAt:string
 }
 
 export interface Order {
@@ -57,9 +62,17 @@ export default function Home() {
         setLoading(true)
 
         // Subscribe to real-time updates
-        const unsubscribeContacts = contactsService.subscribeToContacts((newContacts) => {
-          setContacts(newContacts)
-        })
+        // const unsubscribeContacts = contactsService.subscribeToContacts((newContacts) => {
+        //   setContacts(newContacts)
+        // })
+
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/getAllCustomer`, {
+          method: "GET",
+          headers: { "Content-Type": "application/json", "x-api-key": `${process.env.NEXT_PUBLIC_API_KEY}` },
+        });
+        const data = await response.json();
+        console.log('gstlist', data?.results)
+        setContacts(data?.results)
 
         const unsubscribeOrders = ordersService.subscribeToOrders((newOrders) => {
           setOrders(newOrders)
@@ -71,7 +84,7 @@ export default function Home() {
 
         // Cleanup subscriptions on unmount
         return () => {
-          unsubscribeContacts()
+        //  unsubscribeContacts()
           unsubscribeOrders()
           unsubscribeMessages()
         }
@@ -97,11 +110,31 @@ export default function Home() {
 
   const addContact = async (contact: Omit<Contact, "id" | "addedDate">) => {
     try {
-      await contactsService.addContact({
-        ...contact,
-        addedDate: new Date().toISOString(),
-      })
-      setOperationError(null)
+
+        // alert(JSON.stringify(contact, null, 2))
+       
+
+      // await contactsService.addContact({
+      //   ...contact,
+      //   addedDate: new Date().toISOString(),
+      // })
+      // setOperationError(null)
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/createCustomer`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-api-key": `${process.env.NEXT_PUBLIC_API_KEY}` },
+        body: JSON.stringify({
+          phone: contact.phone,
+          name: contact.name,
+          tags: contact.tags,
+          addedDate: new Date().toISOString(),
+        }),
+      });
+      const errorData = await response.json();
+      console.log("errorData", errorData)
+
+
+
     } catch (error) {
       console.error("Error adding contact:", error)
       setOperationError("Failed to add contact. Please try again.")
@@ -154,9 +187,8 @@ export default function Home() {
 
   const filteredContacts = contacts.filter(
     (contact) =>
-      contact.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      contact.phone.includes(searchQuery) ||
-      contact.tags.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase())),
+      (contact.profile?.name?.toLowerCase() ?? "").includes(searchQuery.toLowerCase()) ||
+      contact?.wa_id.includes(searchQuery),
   )
 
   if (loading) {
@@ -244,9 +276,9 @@ export default function Home() {
           <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="contacts">Contacts</TabsTrigger>
             <TabsTrigger value="compose">Compose</TabsTrigger>
-            <TabsTrigger value="orders">Orders</TabsTrigger>
+            {/* <TabsTrigger value="orders">Orders</TabsTrigger>
             <TabsTrigger value="history">History</TabsTrigger>
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            <TabsTrigger value="analytics">Analytics</TabsTrigger> */}
           </TabsList>
 
           <TabsContent value="contacts" className="space-y-6">

@@ -51,7 +51,7 @@ export function ContactList({ contacts, selectedContacts, onSelectionChange, onD
           checked={isAllSelected}
           onCheckedChange={handleSelectAll}
           ref={(ref) => {
-            if (ref) ref.indeterminate = isIndeterminate
+            if (ref) (ref as HTMLInputElement).indeterminate = isIndeterminate
           }}
         />
         <span className="text-sm font-medium">
@@ -62,10 +62,10 @@ export function ContactList({ contacts, selectedContacts, onSelectionChange, onD
       </div>
 
       {/* Contact List */}
-      <div className="grid gap-4">
+      <div className="grid gap-2">
         {contacts.map((contact) => (
           <Card key={contact.id} className="hover:shadow-md transition-shadow">
-            <CardContent className="p-4">
+            <CardContent className="p-0">
               <div className="flex items-center space-x-4">
                 <Checkbox
                   checked={selectedContacts.includes(contact.id)}
@@ -74,13 +74,21 @@ export function ContactList({ contacts, selectedContacts, onSelectionChange, onD
 
                 <Avatar>
                   <AvatarFallback className="bg-green-100 text-green-700">
-                    {contact.name.charAt(0).toUpperCase()}
+                    {contact.profile?.name?.charAt(0)?.toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between">
-                    <h3 className="font-semibold text-gray-900 truncate">{contact.name}</h3>
+                    <h3 className="font-semibold text-gray-900 truncate">{contact.profile?.name}</h3>
+                     <div className="flex items-center text-sm text-muted-foreground mt-1">
+                    <Phone className="h-3 w-3 mr-1" />
+                    {contact.wa_id}
+                  </div>
+                   <div className="flex items-center text-xs text-muted-foreground mt-1">
+                    <Calendar className="h-3 w-3 mr-1" />
+                    Added {new Date(contact.createdAt).toLocaleDateString()}
+                  </div>
                     <Button
                       variant="ghost"
                       size="sm"
@@ -90,26 +98,7 @@ export function ContactList({ contacts, selectedContacts, onSelectionChange, onD
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
-
-                  <div className="flex items-center text-sm text-muted-foreground mt-1">
-                    <Phone className="h-3 w-3 mr-1" />
-                    {contact.phone}
-                  </div>
-
-                  <div className="flex items-center text-xs text-muted-foreground mt-1">
-                    <Calendar className="h-3 w-3 mr-1" />
-                    Added {new Date(contact.addedDate).toLocaleDateString()}
-                  </div>
-
-                  {contact.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mt-2">
-                      {contact.tags.map((tag, index) => (
-                        <Badge key={index} variant="secondary" className="text-xs">
-                          {tag}
-                        </Badge>
-                      ))}
-                    </div>
-                  )}
+ 
                 </div>
               </div>
             </CardContent>
