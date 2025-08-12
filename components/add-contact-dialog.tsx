@@ -39,6 +39,11 @@ export function AddContactDialog({ open, onOpenChange, onAddContact }: AddContac
       name: name.trim(),
       phone: phone.trim(),
       tags,
+      profile: {
+        name: name.trim(),
+      }, // or provide a default value or input for profile
+      wa_id: "",   // or generate/ask for wa_id
+      createdAt: new Date().toISOString(), // or use your preferred format
     })
 
     // Reset form
