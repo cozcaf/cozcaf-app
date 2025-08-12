@@ -1,5 +1,4 @@
 "use client"
-
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -11,7 +10,8 @@ import { MessageHistory } from "@/components/message-history"
 import { AnalyticsDashboard } from "@/components/analytics-dashboard"
 import { OrdersManagement } from "@/components/orders-management"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Users, MessageSquare, BarChart3, Plus, ShoppingCart } from "lucide-react"
+import { Users, MessageSquare, BarChart3, Plus, ShoppingCart, Loader2 } from "lucide-react"
+import { contactsService, ordersService, messageHistoryService } from "@/lib/firebase-services"
 
 export interface Contact {
   id: string
@@ -47,61 +47,109 @@ export default function Home() {
   const [isAddContactOpen, setIsAddContactOpen] = useState(false)
   const [messageHistory, setMessageHistory] = useState<any[]>([])
   const [orders, setOrders] = useState<Order[]>([])
+  const [loading, setLoading] = useState(true)
+  const [initError, setInitError] = useState<string | null>(null)
+  const [operationError, setOperationError] = useState<string | null>(null)
 
   useEffect(() => {
-    const savedContacts = localStorage.getItem("whatsapp-contacts")
-    if (savedContacts) {
-      setContacts(JSON.parse(savedContacts))
+    const loadData = async () => {
+      try {
+        setLoading(true)
+
+        // Subscribe to real-time updates
+        const unsubscribeContacts = contactsService.subscribeToContacts((newContacts) => {
+          setContacts(newContacts)
+        })
+
+        const unsubscribeOrders = ordersService.subscribeToOrders((newOrders) => {
+          setOrders(newOrders)
+        })
+
+        const unsubscribeMessages = messageHistoryService.subscribeToMessageHistory((newMessages) => {
+          setMessageHistory(newMessages)
+        })
+
+        // Cleanup subscriptions on unmount
+        return () => {
+          unsubscribeContacts()
+          unsubscribeOrders()
+          unsubscribeMessages()
+        }
+      } catch (err) {
+        console.error("Error loading data:", err)
+        setInitError("Failed to load data. Please check your Firebase configuration.")
+      } finally {
+        setLoading(false)
+      }
     }
 
-    const savedHistory = localStorage.getItem("whatsapp-message-history")
-    if (savedHistory) {
-      setMessageHistory(JSON.parse(savedHistory))
-    }
-
-    const savedOrders = localStorage.getItem("whatsapp-orders")
-    if (savedOrders) {
-      setOrders(JSON.parse(savedOrders))
-    }
+    loadData()
   }, [])
 
   useEffect(() => {
-    localStorage.setItem("whatsapp-contacts", JSON.stringify(contacts))
-  }, [contacts])
-
-  useEffect(() => {
-    localStorage.setItem("whatsapp-orders", JSON.stringify(orders))
-  }, [orders])
-
-  const addContact = (contact: Omit<Contact, "id" | "addedDate">) => {
-    const newContact: Contact = {
-      ...contact,
-      id: Date.now().toString(),
-      addedDate: new Date().toISOString(),
+    if (operationError) {
+      const timer = setTimeout(() => {
+        setOperationError(null)
+      }, 5000)
+      return () => clearTimeout(timer)
     }
-    setContacts((prev) => [...prev, newContact])
-  }
+  }, [operationError])
 
-  const deleteContact = (id: string) => {
-    setContacts((prev) => prev.filter((contact) => contact.id !== id))
-    setSelectedContacts((prev) => prev.filter((contactId) => contactId !== id))
-  }
-
-  const addOrder = (order: Omit<Order, "id" | "orderDate">) => {
-    const newOrder: Order = {
-      ...order,
-      id: Date.now().toString(),
-      orderDate: new Date().toISOString(),
+  const addContact = async (contact: Omit<Contact, "id" | "addedDate">) => {
+    try {
+      await contactsService.addContact({
+        ...contact,
+        addedDate: new Date().toISOString(),
+      })
+      setOperationError(null)
+    } catch (error) {
+      console.error("Error adding contact:", error)
+      setOperationError("Failed to add contact. Please try again.")
     }
-    setOrders((prev) => [...prev, newOrder])
   }
 
-  const updateOrder = (id: string, updates: Partial<Order>) => {
-    setOrders((prev) => prev.map((order) => (order.id === id ? { ...order, ...updates } : order)))
+  const deleteContact = async (id: string) => {
+    try {
+      await contactsService.deleteContact(id)
+      setSelectedContacts((prev) => prev.filter((contactId) => contactId !== id))
+      setOperationError(null)
+    } catch (error) {
+      console.error("Error deleting contact:", error)
+      setOperationError("Failed to delete contact. Please try again.")
+    }
   }
 
-  const deleteOrder = (id: string) => {
-    setOrders((prev) => prev.filter((order) => order.id !== id))
+  const addOrder = async (order: Omit<Order, "id" | "orderDate">) => {
+    try {
+      await ordersService.addOrder({
+        ...order,
+        orderDate: new Date().toISOString(),
+      })
+      setOperationError(null)
+    } catch (error) {
+      console.error("Error adding order:", error)
+      setOperationError("Failed to add order. Please try again.")
+    }
+  }
+
+  const updateOrder = async (id: string, updates: Partial<Order>) => {
+    try {
+      await ordersService.updateOrder(id, updates)
+      setOperationError(null)
+    } catch (error) {
+      console.error("Error updating order:", error)
+      setOperationError("Failed to update order. Please try again.")
+    }
+  }
+
+  const deleteOrder = async (id: string) => {
+    try {
+      await ordersService.deleteOrder(id)
+      setOperationError(null)
+    } catch (error) {
+      console.error("Error deleting order:", error)
+      setOperationError("Failed to delete order. Please try again.")
+    }
   }
 
   const filteredContacts = contacts.filter(
@@ -111,16 +159,48 @@ export default function Home() {
       contact.tags.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase())),
   )
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+          <p className="text-gray-600">Loading your WhatsApp data...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (initError) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center">
+        <div className="text-center max-w-md">
+          <div className="text-red-600 mb-4">⚠️ Connection Error</div>
+          <p className="text-gray-600 mb-4">{initError}</p>
+          <Button onClick={() => window.location.reload()}>Retry</Button>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
       <div className="container mx-auto p-6">
-        {/* Header */}
+        {operationError && (
+          <div className="fixed top-4 right-4 z-50 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded shadow-lg">
+            <div className="flex items-center justify-between">
+              <span>⚠️ {operationError}</span>
+              <button onClick={() => setOperationError(null)} className="ml-4 text-red-500 hover:text-red-700">
+                ×
+              </button>
+            </div>
+          </div>
+        )}
+
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-2">WhatsApp Bulk Messenger</h1>
           <p className="text-gray-600">Manage contacts and send bulk messages efficiently</p>
         </div>
 
-        {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -160,7 +240,6 @@ export default function Home() {
           </Card>
         </div>
 
-        {/* Main Content */}
         <Tabs defaultValue="contacts" className="space-y-6">
           <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="contacts">Contacts</TabsTrigger>

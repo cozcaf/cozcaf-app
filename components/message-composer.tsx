@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Send, Users, MessageSquare, Clock, LayoutTemplateIcon as Template, Calendar } from "lucide-react"
 import type { Contact } from "@/app/page"
+import { messageHistoryService } from "@/lib/firebase-services"
 
 interface MessageComposerProps {
   selectedContacts: string[]
@@ -103,20 +104,20 @@ export function MessageComposer({ selectedContacts, contacts }: MessageComposerP
         setSendProgress((prev) => ({ ...prev, failed: prev.failed + 1 }))
       }
 
-      // Store message in history
-      const messageHistory = JSON.parse(localStorage.getItem("whatsapp-message-history") || "[]")
-      const newMessage = {
-        id: Date.now().toString() + i,
-        contactId: contacts[i].id,
-        contactName: contacts[i].name,
-        contactPhone: contacts[i].phone,
-        message: personalizeMessage(message, contacts[i]),
-        status: success ? "delivered" : "failed",
-        sentAt: new Date().toISOString(),
-        scheduled: isScheduled,
+      try {
+        const newMessage = {
+          contactId: contacts[i].id,
+          contactName: contacts[i].name,
+          contactPhone: contacts[i].phone,
+          message: personalizeMessage(message, contacts[i]),
+          status: success ? "delivered" : "failed",
+          sentAt: new Date().toISOString(),
+          scheduled: isScheduled,
+        }
+        await messageHistoryService.addMessage(newMessage)
+      } catch (error) {
+        console.error("Error saving message to Firebase:", error)
       }
-      messageHistory.unshift(newMessage)
-      localStorage.setItem("whatsapp-message-history", JSON.stringify(messageHistory))
     }
 
     setSendProgress((prev) => ({ ...prev, isActive: false }))
@@ -131,24 +132,30 @@ export function MessageComposer({ selectedContacts, contacts }: MessageComposerP
     }
 
     if (isScheduled) {
-      // Store scheduled message
-      const scheduledMessages = JSON.parse(localStorage.getItem("whatsapp-scheduled-messages") || "[]")
-      const newScheduledMessage = {
-        id: Date.now().toString(),
-        message,
-        contacts: selectedContactsData,
-        scheduledFor: new Date(`${scheduleDate}T${scheduleTime}`).toISOString(),
-        createdAt: new Date().toISOString(),
-      }
-      scheduledMessages.push(newScheduledMessage)
-      localStorage.setItem("whatsapp-scheduled-messages", JSON.stringify(scheduledMessages))
+      try {
+        const newScheduledMessage = {
+          message,
+          contacts: selectedContactsData,
+          scheduledFor: new Date(`${scheduleDate}T${scheduleTime}`).toISOString(),
+          createdAt: new Date().toISOString(),
+        }
+        // Note: You might want to create a separate collection for scheduled messages
+        await messageHistoryService.addMessage({
+          ...newScheduledMessage,
+          status: "scheduled",
+        })
 
-      alert(`Message scheduled for ${new Date(`${scheduleDate}T${scheduleTime}`).toLocaleString()}`)
-      setMessage("")
-      setScheduleDate("")
-      setScheduleTime("")
-      setIsScheduled(false)
-      return
+        alert(`Message scheduled for ${new Date(`${scheduleDate}T${scheduleTime}`).toLocaleString()}`)
+        setMessage("")
+        setScheduleDate("")
+        setScheduleTime("")
+        setIsScheduled(false)
+        return
+      } catch (error) {
+        console.error("Error scheduling message:", error)
+        alert("Failed to schedule message. Please try again.")
+        return
+      }
     }
 
     await simulateMessageSending(selectedContactsData, message)
