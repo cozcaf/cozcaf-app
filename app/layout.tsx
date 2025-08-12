@@ -5,8 +5,25 @@ import './globals.css'
 
 export const metadata: Metadata = {
   title: 'Cozcaf',
-  description: 'Bulk Messaging for WhatsApp',
+  description: 'Experience the perfect blend of premium coffee, delicious broast chicken, gourmet burgers, and cozy atmosphere. Where every meal and every moment matters.',
   generator: 'v0.dev',
+  openGraph: {
+    title: "Cozcaf",
+    description: "Bulk Messaging for WhatsApp",
+    images: ['https://cozcaf.github.io/assets/cozcaf-logo.png'], //['https://taxherohq.com/images/logo.svg'],
+    url: 'https://cozcaf-app.vercel.app/'
+  },
+  icons: {
+    icon: '/images/cozcaf-logo.png',
+    shortcut: '/images/cozcaf-logo.png',
+    apple: '/images/cozcaf-logo.png'
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: "Cozcaf",
+    description: "Experience the perfect blend of premium coffee, delicious broast chicken, gourmet burgers, and cozy atmosphere. Where every meal and every moment matters.",
+    images: ['https://cozcaf.github.io/assets/cozcaf-logo.png'] //['https://taxherohq.com/images/logo.svg']
+  }
 }
 
 export default function RootLayout({
