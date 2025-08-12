@@ -101,7 +101,7 @@ export function AddContactDialog({ open, onOpenChange, onAddContact }: AddContac
             />
           </div>
 
-          <div className="space-y-2">
+          {/* <div className="space-y-2">
             <Label htmlFor="tags">Tags</Label>
             <div className="flex space-x-2">
               <Input
@@ -126,7 +126,7 @@ export function AddContactDialog({ open, onOpenChange, onAddContact }: AddContac
                 ))}
               </div>
             )}
-          </div>
+          </div> */}
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
