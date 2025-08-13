@@ -160,8 +160,8 @@ export function MessageComposer({ selectedContacts, contacts }: MessageComposerP
 
   const personalizeMessage = (baseMessage: string, contact: Contact): string => {
     return baseMessage
-      .replace(/{name}/g, contact.name)
-      .replace(/{phone}/g, contact.phone)
+      .replace(/{name}/g, contact.profile.name)
+      .replace(/{phone}/g, contact.wa_id)
       .replace(/{date}/g, new Date().toLocaleDateString())
       .replace(/{time}/g, new Date().toLocaleTimeString())
   }
@@ -424,20 +424,7 @@ export function MessageComposer({ selectedContacts, contacts }: MessageComposerP
                       </p>
                     )}
                   </div>
-                  {/* {contact.tags.length > 0 && (
-                    <div className="flex gap-1">
-                      {contact.tags.slice(0, 2).map((tag, index) => (
-                        <Badge key={index} variant="outline" className="text-xs">
-                          {tag}
-                        </Badge>
-                      ))}
-                      {contact.tags.length > 2 && (
-                        <Badge variant="outline" className="text-xs">
-                          +{contact.tags.length - 2}
-                        </Badge>
-                      )}
-                    </div>
-                  )} */}
+                  
                 </div>
               ))}
             </div>
