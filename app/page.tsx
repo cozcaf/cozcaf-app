@@ -12,6 +12,7 @@ import { OrdersManagement } from "@/components/orders-management"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Users, MessageSquare, BarChart3, Plus, ShoppingCart, Loader2 } from "lucide-react"
 import { contactsService, ordersService, messageHistoryService } from "@/lib/firebase-services"
+import { ImageList } from "@/components/image-managements"
 
 export interface Contact {
   id: string
@@ -19,11 +20,11 @@ export interface Contact {
   phone: string
   tags: string[]
   addedDate: string,
-  profile:{
+  profile: {
     name: string
   }
   wa_id: string,
-  createdAt:any
+  createdAt: any
 }
 
 export interface Order {
@@ -47,6 +48,7 @@ export interface OrderItem {
 
 export default function Home() {
   const [contacts, setContacts] = useState<Contact[]>([])
+  const [allImages, setAllImages] = useState<string[]>([])
   const [selectedContacts, setSelectedContacts] = useState<string[]>([])
   const [searchQuery, setSearchQuery] = useState("")
   const [isAddContactOpen, setIsAddContactOpen] = useState(false)
@@ -84,7 +86,7 @@ export default function Home() {
 
         // Cleanup subscriptions on unmount
         return () => {
-        //  unsubscribeContacts()
+          //  unsubscribeContacts()
           unsubscribeOrders()
           unsubscribeMessages()
         }
@@ -111,8 +113,8 @@ export default function Home() {
   const addContact = async (contact: Omit<Contact, "id" | "addedDate">) => {
     try {
 
-        // alert(JSON.stringify(contact, null, 2))
-       
+      // alert(JSON.stringify(contact, null, 2))
+
 
       // await contactsService.addContact({
       //   ...contact,
@@ -276,6 +278,7 @@ export default function Home() {
           <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="contacts">Contacts</TabsTrigger>
             <TabsTrigger value="compose">Compose</TabsTrigger>
+            <TabsTrigger value="images">Images</TabsTrigger>
             {/* <TabsTrigger value="orders">Orders</TabsTrigger>
             <TabsTrigger value="history">History</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger> */}
@@ -316,6 +319,10 @@ export default function Home() {
 
           <TabsContent value="compose">
             <MessageComposer selectedContacts={selectedContacts} contacts={contacts} />
+          </TabsContent>
+
+          <TabsContent value="images">
+                <ImageList   />
           </TabsContent>
 
           <TabsContent value="orders">
