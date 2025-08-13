@@ -95,7 +95,11 @@ export function AddContactDialog({ open, onOpenChange, onAddContact }: AddContac
             <Input
               id="phone"
               value={phone}
-              onChange={(e) => setPhone(e.target.value)}
+              //onChange={(e) => setPhone(e.target.value)}
+              onChange={(e) => {
+                const value = e.target.value.replace(/\D/g, ""); // Remove anything that's not a digit
+                setPhone(value);
+              }}
               placeholder="Enter phone number (e.g., +1234567890)"
               required
             />
