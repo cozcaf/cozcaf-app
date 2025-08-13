@@ -128,8 +128,10 @@ export const contactsService = {
     }
 
     try {
-      const contactRef = doc(db, "contacts", id)
+      const contactRef = doc(db, "customers", id)
       await deleteDoc(contactRef)
+      console.log("Contact deleted successfully")
+      
     } catch (error) {
       console.error("Error deleting contact:", error)
       throw error

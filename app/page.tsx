@@ -58,8 +58,31 @@ export default function Home() {
   const [initError, setInitError] = useState<string | null>(null)
   const [operationError, setOperationError] = useState<string | null>(null)
 
+  const relodloadData = async () => {
+    try {
+
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/getAllCustomer`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json", "x-api-key": `${process.env.NEXT_PUBLIC_API_KEY}` },
+      });
+      const data = await response.json();
+      console.log('gstlist', data?.results)
+      setContacts(data?.results)
+
+
+      //return () => { }
+    } catch (err) {
+
+
+    } finally {
+
+    }
+  }
+
   useEffect(() => {
-    const loadData = async () => {
+    
+const loadData = async () => {
       try {
         setLoading(true)
 
@@ -76,19 +99,19 @@ export default function Home() {
         console.log('gstlist', data?.results)
         setContacts(data?.results)
 
-        const unsubscribeOrders = ordersService.subscribeToOrders((newOrders) => {
-          setOrders(newOrders)
-        })
+        // const unsubscribeOrders = ordersService.subscribeToOrders((newOrders) => {
+        //   setOrders(newOrders)
+        // })
 
-        const unsubscribeMessages = messageHistoryService.subscribeToMessageHistory((newMessages) => {
-          setMessageHistory(newMessages)
-        })
+        // const unsubscribeMessages = messageHistoryService.subscribeToMessageHistory((newMessages) => {
+        //   setMessageHistory(newMessages)
+        // })
 
         // Cleanup subscriptions on unmount
         return () => {
           //  unsubscribeContacts()
-          unsubscribeOrders()
-          unsubscribeMessages()
+        //  unsubscribeOrders()
+        //  unsubscribeMessages()
         }
       } catch (err) {
         console.error("Error loading data:", err)
@@ -97,7 +120,6 @@ export default function Home() {
         setLoading(false)
       }
     }
-
     loadData()
   }, [])
 
@@ -133,6 +155,7 @@ export default function Home() {
         }),
       });
       const errorData = await response.json();
+      relodloadData()
       console.log("errorData", errorData)
 
 
@@ -146,6 +169,7 @@ export default function Home() {
   const deleteContact = async (id: string) => {
     try {
       await contactsService.deleteContact(id)
+      relodloadData()
       setSelectedContacts((prev) => prev.filter((contactId) => contactId !== id))
       setOperationError(null)
     } catch (error) {
